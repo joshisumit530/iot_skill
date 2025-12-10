@@ -1,0 +1,1020 @@
+firsrt  line follow code
+
+int IN1 = 2;  
+int IN2 = 3;  
+int IN3 = 4;  
+int IN4 = 5;  
+ 
+int ENA = 6;   
+int ENB = 7;   
+ 
+// Sensors
+int SR1 = 8;    // Right-most
+int SR2 = 9;    // Right
+int SC  = 10;   // Center
+int SL2 = 11;   // Left
+int SL1 = 12;   // Left-most
+ 
+int slow = 130;
+int fast = 130;
+ 
+//int slow = 75;    
+//int fast = 100;  
+ 
+void setup() {
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+ 
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+ 
+  pinMode(SR1, INPUT);
+  pinMode(SR2, INPUT);
+  pinMode(SC, INPUT);
+  pinMode(SL2, INPUT);
+  pinMode(SL1, INPUT);
+ 
+  Serial.begin(9600);
+  Serial.println("Line follower ready...");
+}
+ 
+void loop() {
+ 
+  // Read sensors (0 = BLACK, 1 = WHITE)
+  int r1 = digitalRead(SR1);
+  int r2 = digitalRead(SR2);
+  int c  = digitalRead(SC);
+  int l2 = digitalRead(SL2);
+  int l1 = digitalRead(SL1);
+ 
+  // PRINT for debugging
+  Serial.print(l1); Serial.print(" ");
+  Serial.print(l2); Serial.print(" ");
+  Serial.print(c);  Serial.print(" ");
+  Serial.print(r2); Serial.print(" ");
+  Serial.println(r1);
+ 
+ 
+ 
+// WIDE BLACK LINE LOGIC
+ 
+// 1) 3 sensors black → go straight
+  if (c == 1 && l2 == 1 && r2 == 1) {
+    forward(slow);
+  }
+  // 2) Slight left
+  else if (l2 == 1 && c == 1 && r2 == 0) {
+    turnRight(slow);
+  }
+  // 3) Slight right
+  else if (r2 == 1 && c == 1 && l2 == 0) {
+    turnLeft(slow);
+  }
+  // 4) Only center black → perfect alignment
+  else if (c == 1 && l2 == 0 && r2 == 0) {
+    forward(slow);
+  }
+  else if (l1 == 1 && c == 0 && l2 == 0) {
+    turnRight(fast);
+  }
+  else if (r1 == 1 && c == 0 && r2 == 0) {
+    turnLeft(fast);
+  }
+  else if (r1 == 0 && c == 0 && r2 == 1) {
+    turnLeft(fast);
+  }
+  else if (l1 == 1 && c == 0 && l2 == 1) {
+    turnRight(fast);
+  }
+  else if (l1 == 0 && c == 0 && l2 == 1) {
+    turnRight(fast);
+  }
+  else if (r1 == 1 && c == 0 && r2 == 1) {
+    turnLeft(fast);
+  }
+  // 7) Lost line
+  else {
+    stopMotors();
+  }
+}
+ 
+void forward(int spd) {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+ 
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+ 
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+ 
+void turnLeft(int spd) {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+ 
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+ 
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+ 
+void turnRight(int spd) {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+ 
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+ 
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+ 
+void stopMotors() {
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+}
+
+
+
+
+
+
+seocnd code _________________----------------------------------------------------------------------------
+
+
+int IN1 = 2;  
+
+int IN2 = 3;  
+
+int IN3 = 4;  
+
+int IN4 = 5;  
+ 
+int ENA = 6;   
+
+int ENB = 7;   
+ 
+// Sensors
+
+int SR1 = 8;    // Right-most
+
+int SR2 = 9;    // Right
+
+int SC  = 10;   // Center
+
+int SL2 = 11;   // Left
+
+int SL1 = 12;   // Left-most
+ 
+int slow = 130;
+
+int fast = 130;
+ 
+//int slow = 75;    
+
+//int fast = 100;  
+ 
+void setup() {
+
+  pinMode(IN1, OUTPUT);
+
+  pinMode(IN2, OUTPUT);
+
+  pinMode(IN3, OUTPUT);
+
+  pinMode(IN4, OUTPUT);
+ 
+  pinMode(ENA, OUTPUT);
+
+  pinMode(ENB, OUTPUT);
+ 
+  pinMode(SR1, INPUT);
+
+  pinMode(SR2, INPUT);
+
+  pinMode(SC, INPUT);
+
+  pinMode(SL2, INPUT);
+
+  pinMode(SL1, INPUT);
+ 
+  Serial.begin(9600);
+
+  Serial.println("Line follower ready...");
+
+}
+ 
+void loop() {
+ 
+  // Read sensors (0 = BLACK, 1 = WHITE)
+
+  int r1 = digitalRead(SR1);
+
+  int r2 = digitalRead(SR2);
+
+  int c  = digitalRead(SC);
+
+  int l2 = digitalRead(SL2);
+
+  int l1 = digitalRead(SL1);
+ 
+  // PRINT for debugging
+
+  Serial.print(l1); Serial.print(" ");
+
+  Serial.print(l2); Serial.print(" ");
+
+  Serial.print(c);  Serial.print(" ");
+
+  Serial.print(r2); Serial.print(" ");
+
+  Serial.println(r1);
+ 
+ 
+// ✔ CORRECT LOGIC FOR 0 = BLACK, 1 = WHITE
+ 
+// CENTER BLACK → go straight
+
+if (c == 0) {
+
+  forward(slow);
+
+}
+ 
+// LEFT SIDE BLACK → turn left
+
+else if (l2 == 0) {
+
+  turnLeft(fast);
+
+}
+ 
+// RIGHT SIDE BLACK → turn right
+
+else if (r2 == 0) {
+
+  turnRight(fast);
+
+}
+ 
+// FAR LEFT BLACK
+
+else if (l1 == 0) {
+
+  turnLeft(fast);
+
+}
+ 
+// FAR RIGHT BLACK
+
+else if (r1 == 0) {
+
+  turnRight(fast);
+
+}
+ 
+// ⭐ LOST LINE (ALL WHITE)
+
+else if (r1==1 && r2==1 && c==1 && l2==1 && l1==1) {
+ 
+  reverse(120);
+
+  delay(200);
+
+  stopMotors();
+
+  delay(80);
+ 
+  // Try left search
+
+  for (int i = 0; i < 20; i++) {
+
+    turnLeft(110);
+
+    delay(20);
+
+    stopMotors();
+ 
+    if (digitalRead(SR1)==0 || digitalRead(SR2)==0 || digitalRead(SC)==0 ||
+
+        digitalRead(SL2)==0 || digitalRead(SL1)==0)
+
+      return;
+
+  }
+ 
+  // Try right search
+
+  for (int i = 0; i < 20; i++) {
+
+    turnRight(110);
+
+    delay(20);
+
+    stopMotors();
+ 
+    if (digitalRead(SR1)==0 || digitalRead(SR2)==0 || digitalRead(SC)==0 ||
+
+        digitalRead(SL2)==0 || digitalRead(SL1)==0)
+
+      return;
+
+  }
+
+}
+ 
+// If nothing matches
+
+else {
+
+  stopMotors();
+
+}
+ 
+//// WIDE BLACK LINE LOGIC
+
+//
+
+//// 1) 3 sensors black → go straight
+
+//  if (c == 1 && l2 == 1 && r2 == 1) {
+
+//    forward(slow);
+
+//  }
+
+//  
+
+//  // 2) Slight left
+
+//  else if (l2 == 1 && c == 1 && r2 == 0) {
+
+//    turnRight(slow);
+
+//  }
+
+//  
+
+//  // 3) Slight right
+
+//  else if (r2 == 1 && c == 1 && l2 == 0) {
+
+//    turnLeft(slow);
+
+//  }
+
+//  
+
+//  // 4) Only center black → perfect alignment
+
+//  else if (c == 1 && l2 == 0 && r2 == 0) {
+
+//    forward(slow);
+
+//  }
+
+//  
+
+//  else if (l1 == 1 && c == 0 && l2 == 0) {
+
+//    turnRight(fast);
+
+//  }
+
+//  
+
+//  else if (r1 == 1 && c == 0 && r2 == 0) {
+
+//    turnLeft(fast);
+
+//  }
+
+//  else if (r1 == 0 && c == 0 && r2 == 1) {
+
+//    turnLeft(fast);
+
+//  }
+
+//  else if (l1 == 1 && c == 0 && l2 == 1) {
+
+//    turnRight(fast);
+
+//  }
+
+//  else if (l1 == 0 && c == 0 && l2 == 1) {
+
+//    turnRight(fast);
+
+//  }
+
+//  
+
+//  else if (r1 == 1 && c == 0 && r2 == 1) {
+
+//    turnLeft(fast);
+
+//  }
+
+//
+
+//  else if (c== 1 && l1 == 1 && l2 == 1) {
+
+//    turnRight(fast);
+
+//  }
+
+//   else if (c== 1 && r1 == 1 && r2 == 1) {
+
+//    turnLeft(fast);
+
+//  }
+
+//  else if ( r2 == 1 && c== 1 && l1 == 1 && l2 == 1) {
+
+//    turnRight(fast);
+
+//  }
+
+//   else if ( l2 == 1 && c== 1 && r1 == 1 && r2 == 1) {
+
+//    turnLeft(fast);
+
+//  }
+
+//
+
+//// LOST LINE (ALL SENSORS WHITE)
+
+//else if (r1==0 && r2==0 && c==0 && l2==0 && l1==0) {
+
+//
+
+//  Serial.println("Lost line → reversing...");
+
+//  
+
+//  // Step 1: Reverse slightly
+
+//  reverse(120);
+
+//  delay(250);
+
+//
+
+//  stopMotors();
+
+//  delay(100);
+
+//
+
+//  Serial.println("Searching left...");
+
+//  // Step 2: Try rotating left to find line
+
+//  for (int i = 0; i < 15; i++) {
+
+//    turnLeft(110);
+
+//    delay(20);
+
+//    stopMotors();
+
+//
+
+//    if (digitalRead(SR1) || digitalRead(SR2) || digitalRead(SC) || 
+
+//        digitalRead(SL2) || digitalRead(SL1)) {
+
+//      Serial.println("Line found left!");
+
+//      return;
+
+//    }
+
+//  }
+
+//
+
+//  Serial.println("Searching right...");
+
+//  // Step 3: If not found → rotate right
+
+//  for (int i = 0; i < 15; i++) {
+
+//    turnRight(110);
+
+//    delay(20);
+
+//    stopMotors();
+
+//
+
+//    if (digitalRead(SR1) || digitalRead(SR2) || digitalRead(SC) || 
+
+//        digitalRead(SL2) || digitalRead(SL1)) {
+
+//      Serial.println("Line found right!");
+
+//      return;
+
+//    }
+
+//  }
+
+//}
+ 
+// ⭐⭐⭐ LOST LINE: ALL WHITE ⭐⭐⭐
+
+//else if (r1==0 && r2==0 && c==0 && l2==0 && l1==0) {
+
+//
+
+//  Serial.println("LOST LINE → searching...");
+
+//  
+
+//  // Step 1: Reverse a little
+
+//  reverse(120);
+
+//  delay(250);
+
+//  stopMotors();
+
+//  delay(80);
+
+//
+
+//  // Step 2: Try LEFT search
+
+//  Serial.println("Searching LEFT...");
+
+//  for (int i = 0; i < 20; i++) {
+
+//    turnLeft(110);
+
+//    delay(20);
+
+//    stopMotors();
+
+//
+
+//    // Check sensors again
+
+//    int rr1 = digitalRead(SR1);
+
+//    int rr2 = digitalRead(SR2);
+
+//    int cc  = digitalRead(SC);
+
+//    int ll2 = digitalRead(SL2);
+
+//    int ll1 = digitalRead(SL1);
+
+//
+
+//    if (rr1 || rr2 || cc || ll2 || ll1) {
+
+//      Serial.println("Line found LEFT");
+
+//      break;
+
+//    }
+
+//  }
+
+//
+
+//  // If still not found → try RIGHT
+
+//  int found = digitalRead(SR1) || digitalRead(SR2) || digitalRead(SC) || digitalRead(SL2) || digitalRead(SL1);
+
+//
+
+//  if (!found) {
+
+//    Serial.println("Searching RIGHT...");
+
+//    for (int i = 0; i < 20; i++) {
+
+//      turnRight(110);
+
+//      delay(20);
+
+//      stopMotors();
+
+//
+
+//      int rr1 = digitalRead(SR1);
+
+//      int rr2 = digitalRead(SR2);
+
+//      int cc  = digitalRead(SC);
+
+//      int ll2 = digitalRead(SL2);
+
+//      int ll1 = digitalRead(SL1);
+
+//
+
+//      if (rr1 || rr2 || cc || ll2 || ll1) {
+
+//        Serial.println("Line found RIGHT");
+
+//        break;
+
+//      }
+
+//    }
+
+//  }
+
+//
+
+//  // If STILL not found → rotate 360° slowly to find line
+
+//  found = digitalRead(SR1) || digitalRead(SR2) || digitalRead(SC) || digitalRead(SL2) || digitalRead(SL1);
+
+//
+
+//  if (!found) {
+
+//    Serial.println("FULL SEARCH...");
+
+//    for (int i = 0; i < 50; i++) {
+
+//      turnLeft(100);
+
+//      delay(20);
+
+//
+
+//      int rr1 = digitalRead(SR1);
+
+//      int rr2 = digitalRead(SR2);
+
+//      int cc  = digitalRead(SC);
+
+//      int ll2 = digitalRead(SL2);
+
+//      int ll1 = digitalRead(SL1);
+
+//
+
+//      if (rr1 || rr2 || cc || ll2 || ll1) {
+
+//        Serial.println("Line found in FULL SEARCH");
+
+//        break;
+
+//      }
+
+//    }
+
+//  }
+
+//}
+ 
+//  else if (r1==0 && r2==0 && c==0 && l2==0 && l1==0) {
+
+//
+
+//  Serial.println("ALL WHITE → reversing…");
+
+//  reverse(120);
+
+//  delay(250);
+
+//
+
+//  stopMotors();
+
+//  delay(80);
+
+//
+
+//  // Re-read sensors
+
+//  int rr1 = digitalRead(SR1);
+
+//  int rr2 = digitalRead(SR2);
+
+//  int cc  = digitalRead(SC);
+
+//  int ll2 = digitalRead(SL2);
+
+//  int ll1 = digitalRead(SL1);
+
+//
+
+//  // LEFT SIDE DETECTED
+
+//  if (ll1==1 || ll2==1) {
+
+//    Serial.println("Left detected → turning left");
+
+//    turnLeft(fast);
+
+//    delay(200);
+
+//  }
+
+//  // RIGHT SIDE DETECTED
+
+//  else if (rr1==1 || rr2==1) {
+
+//    Serial.println("Right detected → turning right");
+
+//    turnRight(fast);
+
+//    delay(200);
+
+//  }
+
+//  // Still nothing → rotate to search
+
+//  else {
+
+//    Serial.println("Searching for line…");
+
+//    turnLeft(120);
+
+//    delay(300);
+
+//  }
+
+//}
+ 
+  // 7) Lost line
+
+  else {
+
+    stopMotors();
+
+  }
+
+}
+ 
+void forward(int spd) {
+
+  digitalWrite(IN1, HIGH);
+
+  digitalWrite(IN2, LOW);
+ 
+  digitalWrite(IN3, HIGH);
+
+  digitalWrite(IN4, LOW);
+ 
+  analogWrite(ENA, spd);
+
+  analogWrite(ENB, spd);
+
+}
+ 
+void turnLeft(int spd) {
+
+  digitalWrite(IN1, LOW);
+
+  digitalWrite(IN2, HIGH);
+ 
+  digitalWrite(IN3, HIGH);
+
+  digitalWrite(IN4, LOW);
+ 
+  analogWrite(ENA, spd);
+
+  analogWrite(ENB, spd);
+
+}
+ 
+void turnRight(int spd) {
+
+  digitalWrite(IN1, HIGH);
+
+  digitalWrite(IN2, LOW);
+ 
+  digitalWrite(IN3, LOW);
+
+  digitalWrite(IN4, HIGH);
+ 
+  analogWrite(ENA, spd);
+
+  analogWrite(ENB, spd);
+
+}
+ 
+//void reverse(int spd) {
+
+//  digitalWrite(IN1, LOW);
+
+//  digitalWrite(IN2, HIGH);
+
+//
+
+//  digitalWrite(IN3, LOW);
+
+//  digitalWrite(IN4, HIGH);
+
+//
+
+//  analogWrite(ENA, spd);
+
+//  analogWrite(ENB, spd);
+
+//}
+ 
+void reverse(int spd) {
+
+  // Left motor backward
+
+  digitalWrite(IN1, LOW);
+
+  digitalWrite(IN2, HIGH);
+ 
+  // Right motor backward
+
+  digitalWrite(IN3, LOW);
+
+  digitalWrite(IN4, HIGH);
+ 
+  // PWM speed control
+
+  analogWrite(ENA, spd);
+
+  analogWrite(ENB, spd);
+
+}
+ 
+ 
+void stopMotors() {
+
+  analogWrite(ENA, 0);
+
+  analogWrite(ENB, 0);
+
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ --------------------------------------------------  low reverse logic implemented. ----------------------------------------------------------------------------------------------------------------
+ 
+ 
+ 
+ // =================== PIN CONFIG ===================
+int IN1 = 2;
+int IN2 = 3;
+int IN3 = 4;
+int IN4 = 5;
+int ENA = 6;
+int ENB = 7;
+
+// IR Sensors
+int SR1 = 8;    // Right-most
+int SR2 = 9;    // Right
+int SC  = 10;   // Center
+int SL2 = 11;   // Left
+int SL1 = 12;   // Left-most
+
+// Speeds
+int slow = 130;
+int fast = 130;
+
+// =================== SETUP ===================
+void setup() {
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+
+  pinMode(SR1, INPUT);
+  pinMode(SR2, INPUT);
+  pinMode(SC, INPUT);
+  pinMode(SL2, INPUT);
+  pinMode(SL1, INPUT);
+
+  Serial.begin(9600);
+  Serial.println("Line follower ready...");
+}
+
+// =================== MAIN LOOP ===================
+void loop() {
+  // Read sensors (0 = BLACK, 1 = WHITE)
+  int r1 = digitalRead(SR1);
+  int r2 = digitalRead(SR2);
+  int c  = digitalRead(SC);
+  int l2 = digitalRead(SL2);
+  int l1 = digitalRead(SL1);
+
+  // Print sensor status for debugging
+  Serial.print(l1); Serial.print(" ");
+  Serial.print(l2); Serial.print(" ");
+  Serial.print(c);  Serial.print(" ");
+  Serial.print(r2); Serial.print(" ");
+  Serial.println(r1);
+
+  // =================== LINE FOLLOW LOGIC ===================
+  if (c == 1 && l2 == 1 && r2 == 1) forward(slow); // wide line
+  else if (l2 == 1 && c == 1 && r2 == 0) turnRight(slow);
+  else if (r2 == 1 && c == 1 && l2 == 0) turnLeft(slow);
+  else if (c == 1 && l2 == 0 && r2 == 0) forward(slow);
+  else if (l1 == 1 && c == 0 && l2 == 0) turnRight(fast);
+  else if (r1 == 1 && c == 0 && r2 == 0) turnLeft(fast);
+  else if (r1 == 0 && c == 0 && r2 == 1) turnLeft(fast);
+  else if (l1 == 1 && c == 0 && l2 == 1) turnRight(fast);
+  else if (l1 == 0 && c == 0 && l2 == 1) turnRight(fast);
+  else if (r1 == 1 && c == 0 && r2 == 1) turnLeft(fast);
+  else if (c == 1 && l1 == 1 && l2 == 1) turnRight(fast);
+  else if (c == 1 && r1 == 1 && r2 == 1) turnLeft(fast);
+  else if (r2 == 1 && c == 1 && l1 == 1 && l2 == 1) turnRight(fast);
+  else if (l2 == 1 && c == 1 && r1 == 1 && r2 == 1) turnLeft(fast);
+
+  // =================== LOST LINE LOGIC ===================
+  else if (r1 == 0 && r2 == 0 && c == 0 && l2 == 0 && l1 == 0) {
+    Serial.println("Lost line → reversing slowly...");
+    slowReverse(); // step reverse function
+  }
+
+  else stopMotors(); // default
+}
+
+// =================== MOTOR FUNCTIONS ===================
+void forward(int spd) {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+
+void turnLeft(int spd) {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+
+void turnRight(int spd) {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+
+void stopMotors() {
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+}
+
+// =================== SLOW REVERSE ===================
+void slowReverse() {
+  int burst = 130;     // minimum PWM where motor moves
+  int onTime = 40;     // motor ON time (ms)
+  int offTime = 70;    // motor OFF time (ms)
+  int steps = 5;       // number of pulses
+
+  for (int i = 0; i < steps; i++) {
+    // Reverse both motors
+    digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
+    digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
+
+    analogWrite(ENA, burst);
+    analogWrite(ENB, burst);
+    delay(onTime);
+
+    // Stop briefly
+    stopMotors();
+    delay(offTime);
+
+    // Break if line is detected during reverse
+    if (digitalRead(SR1) || digitalRead(SR2) || digitalRead(SC) || digitalRead(SL2) || digitalRead(SL1)) {
+      Serial.println("Line found during reverse!");
+      break;
+    }
+  }
+
+  // Wait until at least one sensor detects line
+  while (digitalRead(SR1)==0 && digitalRead(SR2)==0 && digitalRead(SC)==0 && digitalRead(SL2)==0 && digitalRead(SL1)==0) {
+    // do nothing
+  }
+  Serial.println("Line found → continue normal operation");
+}
+
+
+
+
+
