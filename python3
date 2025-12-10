@@ -1,0 +1,287 @@
+									((((  Servo.h	&  ultra  & ir & line follow  )))))																	
+
+✅ Simple Servo Motor Code (Beginner Friendly)
+
+
+Wiring
+
+Servo RED → 5V
+
+Servo BROWN/BLACK → GND
+
+Servo YELLOW/ORANGE (Signal) → Pin 9
+
+#include <Servo.h>
+
+Servo myservo;     // create servo object
+
+void setup() {
+  myservo.attach(9);  // attach servo signal to pin 9
+}
+
+void loop() {
+  myservo.write(0);     // move to 0 degrees
+  delay(1000);
+
+  myservo.write(90);    // move to 90 degrees
+  delay(1000);
+
+  myservo.write(180);   // move to 180 degrees
+  delay(1000);
+}
+
+
+
+
+
+
+✅ Simple Code: Servo Moves When Object Is Near
+
+#include <Servo.h>
+
+Servo myservo;
+
+int trig = 2;
+int echo = 3;
+
+void setup() {
+  myservo.attach(9);
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+  Serial.begin(9600);
+}
+
+long getDistance() {
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+
+  long duration = pulseIn(echo, HIGH);
+  long distance = duration * 0.034 / 2;  // distance in cm
+  return distance;
+}
+
+void loop() {
+  long distance = getDistance();
+  Serial.println(distance);
+
+  if (distance < 20) {    // if object is less than 20 cm
+    myservo.write(90);    // rotate to 90 degree
+  } else {
+    myservo.write(0);     // rotate back to 0 degree
+  }
+
+  delay(200);
+}
+
+
+
+
+
+✅ simplest code for 1 servo + 4 ultrasonic sensors (front, left, right, back).
+
+Ultrasonic Sensor Pins
+Sensor	TRIG	ECHO
+Front	2	3
+Left	4	5
+Right	6	7
+Back	8	9
+
+Servo ----->
+Signal → Pin 10
+5V → 5V (or external)
+GND → GND
+
+
+#include <Servo.h>
+
+Servo myservo;
+
+// Ultrasonic pins
+int trigF = 2, echoF = 3;  // Front
+int trigL = 4, echoL = 5;  // Left
+int trigR = 6, echoR = 7;  // Right
+int trigB = 8, echoB = 9;  // Back
+
+long getDistance(int trig, int echo) {
+  digitalWrite(trig, LOW);  
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+
+  long duration = pulseIn(echo, HIGH);
+  long distance = duration * 0.034 / 2;
+  return distance;
+}
+
+void setup() {
+  myservo.attach(10);
+
+  pinMode(trigF, OUTPUT);  pinMode(echoF, INPUT);
+  pinMode(trigL, OUTPUT);  pinMode(echoL, INPUT);
+  pinMode(trigR, OUTPUT);  pinMode(echoR, INPUT);
+  pinMode(trigB, OUTPUT);  pinMode(echoB, INPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  long dF = getDistance(trigF, echoF);
+  long dL = getDistance(trigL, echoL);
+  long dR = getDistance(trigR, echoR);
+  long dB = getDistance(trigB, echoB);
+
+  Serial.print("F: "); Serial.print(dF);
+  Serial.print(" | L: "); Serial.print(dL);
+  Serial.print(" | R: "); Serial.print(dR);
+  Serial.print(" | B: "); Serial.println(dB);
+
+  // Find nearest distance
+  long minDist = dF;
+  int direction = 0;  // 0=front, 1=left, 2=right, 3=back
+
+  if (dL < minDist) { minDist = dL; direction = 1; }
+  if (dR < minDist) { minDist = dR; direction = 2; }
+  if (dB < minDist) { minDist = dB; direction = 3; }
+
+  // Move servo based on nearest sensor
+  if (direction == 0) myservo.write(0);     // Front
+  if (direction == 1) myservo.write(90);    // Left
+  if (direction == 2) myservo.write(180);   // Right
+  if (direction == 3) myservo.write(45);    // Back
+
+  delay(200);
+}
+
+
+
+✅ FULL COMBINED CODE (Simple & Works)  (ulta and ir  line follow car code))))))))))))))
+
+
+#include <Servo.h>
+
+Servo myservo;
+
+// Motor pins
+int IN1 = 2;
+int IN2 = 3;
+int IN3 = 4;
+int IN4 = 5;
+int ENA = 6;
+int ENB = 7;
+
+// IR Sensors
+int L = A0;
+int R = A1;
+
+// Ultrasonic pins
+int trigF = 8, echoF = 9;
+int trigL = 10, echoL = 11;
+int trigR = 12, echoR = 13;
+int trigB = A2, echoB = A3;
+
+long getDistance(int trig, int echo) {
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  long duration = pulseIn(echo, HIGH);
+  long distance = duration * 0.034 / 2;
+  return distance;
+}
+
+void forward() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 150);
+  analogWrite(ENB, 150);
+}
+
+void leftTurn() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+}
+
+void rightTurn() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+}
+
+void stopCar() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
+
+void setup() {
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+
+  pinMode(L, INPUT);
+  pinMode(R, INPUT);
+
+  pinMode(trigF, OUTPUT); pinMode(echoF, INPUT);
+  pinMode(trigL, OUTPUT); pinMode(echoL, INPUT);
+  pinMode(trigR, OUTPUT); pinMode(echoR, INPUT);
+  pinMode(trigB, OUTPUT); pinMode(echoB, INPUT);
+
+  myservo.attach(3);
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  // 1️⃣ READ LINE SENSOR
+  int leftIR = digitalRead(L);
+  int rightIR = digitalRead(R);
+
+  // 2️⃣ READ ULTRASONIC SENSORS
+  long dF = getDistance(trigF, echoF);
+  long dL = getDistance(trigL, echoL);
+  long dR = getDistance(trigR, echoR);
+  long dB = getDistance(trigB, echoB);
+
+  // 3️⃣ IF OBSTACLE NEAR → SERVO ALERT
+  if (dF < 15) { myservo.write(0); stopCar(); }
+  else if (dL < 15) { myservo.write(90); stopCar(); }
+  else if (dR < 15) { myservo.write(180); stopCar(); }
+  else if (dB < 15) { myservo.write(45); stopCar(); }
+
+  else {
+    myservo.write(0);  // normal
+  }
+
+  // 4️⃣ LINE FOLLOWER LOGIC
+  if (leftIR == 0 && rightIR == 0) {
+    forward();
+  }
+  else if (leftIR == 0 && rightIR == 1) {
+    leftTurn();
+  }
+  else if (leftIR == 1 && rightIR == 0) {
+    rightTurn();
+  }
+  else {
+    stopCar();
+  }
+
+  delay(30);
+}
+
+
+
