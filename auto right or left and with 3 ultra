@@ -1,0 +1,156 @@
+#include <Wire.h>
+#include "Adafruit_TCS34725.h"
+
+// ===== COLOR SENSOR =====
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(
+  TCS34725_INTEGRATIONTIME_50MS,
+  TCS34725_GAIN_4X
+);
+
+// ===== MOTOR PINS =====
+int IN1 = 2;
+int IN2 = 3;
+int IN3 = 4;
+int IN4 = 5;
+int ENA = 6;
+int ENB = 7;
+
+// ===== ULTRASONIC PINS =====
+int trigC = 8,  echoC = 9;   // Center
+int trigL = 10, echoL = 11;  // Left
+int trigR = 12, echoR = 13;  // Right
+
+// ---------- FUNCTIONS ----------
+long distanceCM(int trig, int echo) {
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  return pulseIn(echo, HIGH) * 0.034 / 2;
+}
+
+// ===== MOTOR CONTROL =====
+void forward() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 160);
+  analogWrite(ENB, 160);
+}
+
+void stopCar() {
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+}
+
+void turnRight() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 150);
+  analogWrite(ENB, 150);
+}
+
+void turnLeft() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 150);
+  analogWrite(ENB, 150);
+}
+
+// ===== COLOR DETECTION =====
+String readColor() {
+  uint16_t r, g, b, c;
+  tcs.getRawData(&r, &g, &b, &c);
+
+  if (r > g && r > b) return "RED";
+  if (g > r && g > b) return "GREEN";
+  if (b > r && b > g) return "BLUE";
+  return "UNKNOWN";
+}
+
+// ---------- SETUP ----------
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+
+  pinMode(trigC, OUTPUT); pinMode(echoC, INPUT);
+  pinMode(trigL, OUTPUT); pinMode(echoL, INPUT);
+  pinMode(trigR, OUTPUT); pinMode(echoR, INPUT);
+
+  if (!tcs.begin()) {
+    Serial.println("Color Sensor NOT found!");
+    while (1);
+  } else {
+    Serial.println("Color Sensor Ready");
+  }
+}
+
+// ---------------- MAIN LOOP ----------------
+void loop() {
+
+  long DC = distanceCM(trigC, echoC);
+  long DL = distanceCM(trigL, echoL);
+  long DR = distanceCM(trigR, echoR);
+
+  // ========= NORMAL DRIVING =========
+  if (DC > 15) {
+    forward();
+    return;
+  }
+
+  // ========= OBJECT DETECTED =========
+  stopCar();
+  delay(300);
+
+  // ----- READ COLOR -----
+  String c = readColor();
+  Serial.print("COLOR: ");
+  Serial.println(c);
+
+  // -------- COLOR MATCH → PICK (later) --------
+  if (c == "RED" || c == "GREEN" || c == "BLUE") {
+    Serial.println("BALL FOUND → (GRIPPER CODE HERE)");
+    delay(1000);
+    // ** DO NOT add gripper now as per your instruction **
+  }
+
+  // -------- COLOR NOT MATCH → AVOID --------
+  else {
+    Serial.println("Wrong color → Avoiding...");
+  }
+
+  // ===== TRY RIGHT FIRST =====
+  if (DR > 15) {
+    Serial.println("Turning RIGHT");
+    turnRight();
+    delay(500);
+  }
+  // ===== IF RIGHT BLOCKED → TURN LEFT =====
+  else if (DL > 15) {
+    Serial.println("Turning LEFT");
+    turnLeft();
+    delay(500);
+  }
+  // ===== IF BOTH BLOCKED → STOP =====
+  else {
+    Serial.println("NO PATH → STOPPING");
+    stopCar();
+  }
+
+  // continue forward
+  forward();
+  delay(200);
+}
+
